@@ -1,0 +1,20 @@
+{
+    "name": "dakwamine/component-based-object",
+    "description": "Helps building apps using component based objects.",
+    "type": "library",
+    "require": {
+        "php": ">=7.2"
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Quang-Minh DANG",
+            "email": "dakwamine@gmail.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "Dakwamine\\Component\\": "src/"
+        }
+    }
+}
