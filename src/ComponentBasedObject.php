@@ -5,51 +5,37 @@ namespace Dakwamine\Component;
 /**
  * Base class for component based objects.
  */
-abstract class ComponentBasedObject
+abstract class ComponentBasedObject implements ComponentBasedObjectInterface
 {
     /**
      * Current components.
      *
-     * @var ComponentBasedObject[]
+     * @var object[]
      */
     protected $components = [];
 
     /**
      * Shared components.
      *
-     * @var ComponentBasedObject[]
+     * @var object[]
      */
     private static $sharedComponents = [];
 
     /**
-     * Adds an already created component.
-     *
-     * @param ComponentBasedObject $component
-     *   The component to add.
+     * {@inheritdoc}
      */
-    public function addComponent(ComponentBasedObject $component)
+    public function addComponent(object $component): void
     {
         $this->components[] = $component;
     }
 
     /**
-     * Creates a component instance by class name.
-     *
-     * @param string $className
-     *   Fully-qualified class name.
-     *
-     * @return ComponentBasedObject|null
-     *   The instantiated component.
+     * {@inheritdoc}
      */
-    public function addComponentByClassName(string $className): ?ComponentBasedObject
+    public function addComponentByClassName(string $className): ?object
     {
         if (!class_exists($className)) {
             // Not an existing class.
-            return null;
-        }
-
-        if (!is_a($className, ComponentBasedObject::class, true)) {
-            // Not a component based object.
             return null;
         }
 
@@ -59,34 +45,20 @@ abstract class ComponentBasedObject
     }
 
     /**
-     * Adds an already created component to shared components.
-     *
-     * @param ComponentBasedObject $component
-     *   The component to add.
+     * {@inheritdoc}
      */
-    public static function addSharedComponent(ComponentBasedObject $component)
+    public static function addSharedComponent(object $component): void
     {
         self::$sharedComponents[] = $component;
     }
 
     /**
-     * Creates a shared component instance by class name.
-     *
-     * @param string $className
-     *   Fully-qualified class name.
-     *
-     * @return ComponentBasedObject|null
-     *   The instantiated component.
+     * {@inheritdoc}
      */
-    public static function addSharedComponentByClassName(string $className): ?ComponentBasedObject
+    public static function addSharedComponentByClassName(string $className): ?object
     {
         if (!class_exists($className)) {
             // Not an existing class.
-            return null;
-        }
-
-        if (!is_a($className, ComponentBasedObject::class, true)) {
-            // Not a component based object.
             return null;
         }
 
@@ -96,17 +68,9 @@ abstract class ComponentBasedObject
     }
 
     /**
-     * Gets a single component by class name.
-     *
-     * @param string $className
-     *   Class name.
-     * @param bool $addIfNotFound
-     *   Set to true to attempt instantiation if not found.
-     *
-     * @return ComponentBasedObject|null
-     *   The component if found.
+     * {@inheritdoc}
      */
-    public function getComponentByClassName(string $className, bool $addIfNotFound = false): ?ComponentBasedObject
+    public function getComponentByClassName(string $className, bool $addIfNotFound = false): ?object
     {
         foreach ($this->components as $component) {
             if ($component instanceof $className) {
@@ -126,10 +90,7 @@ abstract class ComponentBasedObject
     }
 
     /**
-     * Gets the current components.
-     *
-     * @return ComponentBasedObject[]
-     *   Array of components.
+     * {@inheritdoc}
      */
     public function getComponents(): array
     {
@@ -137,13 +98,7 @@ abstract class ComponentBasedObject
     }
 
     /**
-     * Gets components by class name.
-     *
-     * @param string $className
-     *   Class name.
-     *
-     * @return ComponentBasedObject[]
-     *   Array of components. May be empty.
+     * {@inheritdoc}
      */
     public function getComponentsByClassName(string $className): array
     {
@@ -159,20 +114,12 @@ abstract class ComponentBasedObject
     }
 
     /**
-     * Gets the shared component by class name.
-     *
-     * @param string $className
-     *   Class name.
-     * @param bool $addIfNotFound
-     *   Set to true to attempt instantiation if not found.
-     *
-     * @return ComponentBasedObject|null
-     *   The object. Null value if not found.
+     * {@inheritdoc}
      */
     public static function getSharedComponentByClassName(
         string $className,
         bool $addIfNotFound = false
-    ): ?ComponentBasedObject {
+    ): ?object {
         foreach (self::$sharedComponents as $component) {
             if ($component instanceof $className) {
                 return $component;
@@ -191,10 +138,7 @@ abstract class ComponentBasedObject
     }
 
     /**
-     * Gets the current shared components.
-     *
-     * @return ComponentBasedObject[]
-     *   Array of components.
+     * {@inheritdoc}
      */
     public static function getSharedComponents(): array
     {
@@ -202,13 +146,7 @@ abstract class ComponentBasedObject
     }
 
     /**
-     * Gets components by class name.
-     *
-     * @param string $className
-     *   Class name.
-     *
-     * @return ComponentBasedObject[]
-     *   Array of components. May be empty.
+     * {@inheritdoc}
      */
     public static function getSharedComponentsByClassName(string $className): array
     {
@@ -224,13 +162,7 @@ abstract class ComponentBasedObject
     }
 
     /**
-     * Tells if there is a component by class name.
-     *
-     * @param string $className
-     *   The class name.
-     *
-     * @return bool
-     *   True if there is at least one component instance, false otherwise.
+     * {@inheritdoc}
      */
     public function hasComponentByClassName(string $className): bool
     {
@@ -244,13 +176,7 @@ abstract class ComponentBasedObject
     }
 
     /**
-     * Tells if there is a shared component by class name.
-     *
-     * @param string $className
-     *   The class name.
-     *
-     * @return bool
-     *   True if there is at least one component instance, false otherwise.
+     * {@inheritdoc}
      */
     public static function hasSharedComponentByClassName(string $className): bool
     {
@@ -264,12 +190,9 @@ abstract class ComponentBasedObject
     }
 
     /**
-     * Removes the specified component instance.
-     *
-     * @param ComponentBasedObject $component
-     *   The component instance to remove.
+     * {@inheritdoc}
      */
-    public function removeComponent(ComponentBasedObject $component)
+    public function removeComponent(object $component): void
     {
         foreach ($this->components as $key => $c) {
             // This will compare by reference.
@@ -281,12 +204,9 @@ abstract class ComponentBasedObject
     }
 
     /**
-     * Removes the components by class name.
-     *
-     * @param string $className
-     *   Class name.
+     * {@inheritdoc}
      */
-    public function removeComponentsByClassName(string $className)
+    public function removeComponentsByClassName(string $className): void
     {
         foreach ($this->components as $key => $c) {
             if ($c instanceof $className) {
@@ -296,12 +216,9 @@ abstract class ComponentBasedObject
     }
 
     /**
-     * Removes the specified shared component instance.
-     *
-     * @param ComponentBasedObject $component
-     *   The component instance to remove.
+     * {@inheritdoc}
      */
-    public static function removeSharedComponent(ComponentBasedObject $component)
+    public static function removeSharedComponent(object $component): void
     {
         foreach (self::$sharedComponents as $key => $c) {
             // This will compare by reference.
@@ -313,12 +230,9 @@ abstract class ComponentBasedObject
     }
 
     /**
-     * Removes the shared components by class name.
-     *
-     * @param string $className
-     *   Class name.
+     * {@inheritdoc}
      */
-    public static function removeSharedComponentsByClassName(string $className)
+    public static function removeSharedComponentsByClassName(string $className): void
     {
         foreach (self::$sharedComponents as $key => $c) {
             if ($c instanceof $className) {
