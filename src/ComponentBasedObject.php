@@ -5,7 +5,7 @@ namespace Dakwamine\Component;
 /**
  * Base class for component based objects.
  */
-abstract class ComponentBasedObject implements ComponentBasedObjectInterface
+class ComponentBasedObject implements ComponentBasedObjectInterface
 {
     /**
      * Current components.
@@ -15,11 +15,11 @@ abstract class ComponentBasedObject implements ComponentBasedObjectInterface
     protected $components = [];
 
     /**
-     * Shared components.
+     * Global container for shared components.
      *
-     * @var object[]
+     * @var ComponentBasedObjectInterface
      */
-    private static $sharedComponents = [];
+    private static $sharedComponentsContainer;
 
     /**
      * {@inheritdoc}
@@ -49,7 +49,7 @@ abstract class ComponentBasedObject implements ComponentBasedObjectInterface
      */
     public static function addSharedComponent(object $component): void
     {
-        self::$sharedComponents[] = $component;
+        self::getSharedComponentsContainer()->addComponent($component);
     }
 
     /**
@@ -57,14 +57,7 @@ abstract class ComponentBasedObject implements ComponentBasedObjectInterface
      */
     public static function addSharedComponentByClassName(string $className): ?object
     {
-        if (!class_exists($className)) {
-            // Not an existing class.
-            return null;
-        }
-
-        $instance = new $className;
-        self::$sharedComponents[] = $instance;
-        return $instance;
+        return self::getSharedComponentsContainer()->addComponentByClassName($className);
     }
 
     /**
@@ -114,27 +107,28 @@ abstract class ComponentBasedObject implements ComponentBasedObjectInterface
     }
 
     /**
+     * Gets the global container.
+     *
+     * @return ComponentBasedObjectInterface
+     *   The global container.
+     */
+    private static function getSharedComponentsContainer(): ComponentBasedObjectInterface
+    {
+        if (empty(self::$sharedComponentsContainer)) {
+            self::$sharedComponentsContainer = new self();
+        }
+
+        return self::$sharedComponentsContainer;
+    }
+
+    /**
      * {@inheritdoc}
      */
     public static function getSharedComponentByClassName(
         string $className,
         bool $addIfNotFound = false
     ): ?object {
-        foreach (self::$sharedComponents as $component) {
-            if ($component instanceof $className) {
-                return $component;
-            }
-        }
-
-        if ($addIfNotFound === true) {
-            $component = self::addSharedComponentByClassName($className);
-
-            // May still be null.
-            return $component;
-        }
-
-        // Not found.
-        return null;
+        return self::getSharedComponentsContainer()->getComponentByClassName($className, $addIfNotFound);
     }
 
     /**
@@ -142,7 +136,7 @@ abstract class ComponentBasedObject implements ComponentBasedObjectInterface
      */
     public static function getSharedComponents(): array
     {
-        return self::$sharedComponents;
+        return self::getSharedComponentsContainer()->getComponents();
     }
 
     /**
@@ -150,15 +144,7 @@ abstract class ComponentBasedObject implements ComponentBasedObjectInterface
      */
     public static function getSharedComponentsByClassName(string $className): array
     {
-        $components = [];
-
-        foreach (self::$sharedComponents as $component) {
-            if ($component instanceof $className) {
-                $components[] = $component;
-            }
-        }
-
-        return $components;
+        return self::getSharedComponentsContainer()->getComponentByClassName($className);
     }
 
     /**
@@ -220,13 +206,7 @@ abstract class ComponentBasedObject implements ComponentBasedObjectInterface
      */
     public static function removeSharedComponent(object $component): void
     {
-        foreach (self::$sharedComponents as $key => $c) {
-            // This will compare by reference.
-            if ($c === $component) {
-                unset(self::$sharedComponents[$key]);
-                return;
-            }
-        }
+        self::getSharedComponentsContainer()->removeComponent($component);
     }
 
     /**
@@ -234,10 +214,6 @@ abstract class ComponentBasedObject implements ComponentBasedObjectInterface
      */
     public static function removeSharedComponentsByClassName(string $className): void
     {
-        foreach (self::$sharedComponents as $key => $c) {
-            if ($c instanceof $className) {
-                unset(self::$sharedComponents[$key]);
-            }
-        }
+        self::getSharedComponentsContainer()->removeSharedComponentsByClassName($className);
     }
 }
