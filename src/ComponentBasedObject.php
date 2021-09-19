@@ -144,7 +144,7 @@ class ComponentBasedObject implements ComponentBasedObjectInterface
      */
     public static function getSharedComponentsByClassName(string $className): array
     {
-        return self::getSharedComponentsContainer()->getComponentByClassName($className);
+        return self::getSharedComponentsContainer()->getComponentsByClassName($className);
     }
 
     /**
