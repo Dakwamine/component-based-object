@@ -120,11 +120,17 @@ class Company extends Location {
 
 class Team extends ComponentBasedObject
 {
+  /**
+   * @var Company
+   */
+  private $company;
+
   public function buildTeam()
   {
     foreach ($this->getStartingTeamMembersInfo() as $info) {
       $member = $this->addComponentByClassName(Member::class);
       $member->setInfo($info);
+      $member->setTeam($this);
     }
   }
 
@@ -132,6 +138,16 @@ class Team extends ComponentBasedObject
   {
     // Empty base team.
     return [];
+  }
+
+  public function setCompany(Company $company = null): void
+  {
+    $this->company = $company;
+  }
+
+  public function getCompany(): ?Company
+  {
+    return $this->company;
   }
 
   public function sendToWork(): void
@@ -195,11 +211,11 @@ class Member extends ComponentBasedObject
   private $home;
 
   /**
-   * Current company.
+   * Current team.
    *
-   * @var Company
+   * @var Team
    */
-  private $company;
+  private $team;
 
   private $atWork, $atHome;
 
@@ -208,9 +224,14 @@ class Member extends ComponentBasedObject
     $this->info = $info;
   }
 
+  public function setTeam(Team $team): void
+  {
+    $this->team = $team;
+  }
+
   public function goToWork(): void
   {
-    if (empty($this->company)) {
+    if (empty($this->team->getCompany())) {
       return;
     }
 
@@ -224,7 +245,7 @@ class Member extends ComponentBasedObject
       return;
     }
 
-    $transport->move([$this], $this->company);
+    $transport->move([$this], $this->team->getCompany());
     $this->atWork = true;
     $this->atHome = false;
   }
@@ -318,8 +339,10 @@ $company = $landManager->addComponentByClassName(Company::class);
 
 // Add two teams to the company.
 $managementTeam = $company->addComponentByClassName(ManagementTeam::class);
+$managementTeam->setCompany($company);
 $managementTeam->buildTeam();
 $devTeam = $company->addComponentByClassName(DevTeam::class);
+$devTeam->setCompany($company);
 $devTeam->buildTeam();
 
 // Make the teams go to work, or not (depends on the Clock).
