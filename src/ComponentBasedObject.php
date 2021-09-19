@@ -166,13 +166,7 @@ class ComponentBasedObject implements ComponentBasedObjectInterface
      */
     public static function hasSharedComponentByClassName(string $className): bool
     {
-        foreach (self::$sharedComponents as $component) {
-            if ($component instanceof $className) {
-                return true;
-            }
-        }
-
-        return false;
+        return self::sharedComponentsContainer->hasComponentByClassName($className);
     }
 
     /**
