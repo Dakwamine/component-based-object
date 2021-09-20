@@ -10,8 +10,8 @@ class RootDependencyDefinition extends DependencyDefinition
     /**
      * {@inheritdoc}
      */
-    public function __construct($className, DependencyDefinition $backupDependencyDefinition = null) {
-        parent::__construct($className, $backupDependencyDefinition);
+    public function __construct($className, &$dependerPropertyToSet, DependencyDefinition $backupDependencyDefinition = null) {
+        parent::__construct($className, $dependerPropertyToSet, $backupDependencyDefinition);
         $this->componentBucketType = ComponentBucketType::ROOT;
     }
 }

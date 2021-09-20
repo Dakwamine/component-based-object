@@ -29,17 +29,25 @@ abstract class DependencyDefinition {
     protected $componentBucketType;
 
     /**
+     * A reference to a property of the depender object class to set.
+     *
+     * @var mixed
+     */
+    private $dependerPropertyToSet;
+
+    /**
      * Dependency Definition constructor.
      *
      * @param string $className
      *   The class name of the dependency.
-     * @param string $componentBucketType
-     *   Tells where the dependency is expected to be placed.
+     * @param mixed $dependerPropertyToSet
+     *   A reference to a property of the depender object class to set.
      * @param DependencyDefinition $backupDependencyDefinition
      *   A DependencyDefinition to be used in case of instantiation failure.
      */
-    public function __construct($className, DependencyDefinition $backupDependencyDefinition = null) {
+    public function __construct($className, &$dependerPropertyToSet, DependencyDefinition $backupDependencyDefinition = null) {
         $this->className = $className;
+        $this->dependerPropertyToSet = &$dependerPropertyToSet;
         $this->backupDependencyDefinition = $backupDependencyDefinition;
     }
 
@@ -90,5 +98,17 @@ abstract class DependencyDefinition {
     {
         $this->backupDependencyDefinition = $backup;
         return $backup;
+    }
+
+    /**
+     * Sets the value on the depender property.
+     *
+     * @param mixed $value
+     *   The value to set on the depender property, usually the instantiated dependency.
+     *   Has no effect if no depender property has been set by the DependencyDefinition.
+     */
+    public function setDependerPropertyValue($value): void
+    {
+        $this->dependerPropertyToSet = $value;
     }
 }

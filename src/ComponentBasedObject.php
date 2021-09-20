@@ -2,6 +2,8 @@
 
 namespace Dakwamine\Component;
 
+use Dakwamine\Component\Exception\UnmetDependencyException;
+
 /**
  * Base class for component based objects.
  */
@@ -127,6 +129,8 @@ class ComponentBasedObject
         }
         else {
             // Non-component based objects.
+            $instance = new $className;
+
             if (!$this->addComponent($instance, $componentBucketType)) {
                 // Attempted to add a component which could not be referenced.
                 return null;
@@ -389,14 +393,14 @@ class ComponentBasedObject
      * @param DependencyDefinition $dependencyDefinition
      *   Dependency definition to process.
      *
-     * @return ComponentBasedObject|null
-     *   A backup component if failed to process this dependency, or null if all
-     *   went well.
+     * @return DependencyDefinition|null
+     *   A backup DependencyDefinition if failed to process this dependency,
+     *   or null if all went well.
      *
      * @throws UnmetDependencyException
      *   Could not retrieve a mandatory dependency.
      */
-    private function processDependencyDefinition(DependencyDefinition $dependencyDefinition): ?ComponentBasedObject
+    private function processDependencyDefinition(DependencyDefinition $dependencyDefinition): ?DependencyDefinition
     {
         if (empty($className = $dependencyDefinition->getClassName())) {
             // Empty definition.
@@ -448,6 +452,7 @@ class ComponentBasedObject
                     // Failed to retrieve a suitable instance.
                     throw new UnmetDependencyException(sprintf('Failed to retrieve a suitable instance. Dependency class name was: %s', $className));
                 }
+
                 break;
 
             case ComponentBucketType::SUB:
@@ -459,6 +464,10 @@ class ComponentBasedObject
                 // Unknown dependency type.
                 throw new UnmetDependencyException(sprintf('Tried to instantiate a dependency, but could not determine were it was expected to be appended. Expected dependency class name was: %s, given dependency type was: %s', $className, $componentBucketType));
         }
+
+        // Reference the instance on the depender.
+        // (if the property reference has been provided on DependencyDefinition).
+        $dependencyDefinition->setDependerPropertyValue($instance);
 
         // Dependency retrieved.
         return null;
