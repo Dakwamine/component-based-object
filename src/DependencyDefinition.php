@@ -42,10 +42,11 @@ abstract class DependencyDefinition {
      *   The class name of the dependency.
      * @param mixed $dependerPropertyToSet
      *   A reference to a property of the depender object class to set.
+     *   Leave null if not needed.
      * @param DependencyDefinition $backupDependencyDefinition
      *   A DependencyDefinition to be used in case of instantiation failure.
      */
-    public function __construct($className, &$dependerPropertyToSet, DependencyDefinition $backupDependencyDefinition = null) {
+    public function __construct($className, &$dependerPropertyToSet = null, DependencyDefinition $backupDependencyDefinition = null) {
         $this->className = $className;
         $this->dependerPropertyToSet = &$dependerPropertyToSet;
         $this->backupDependencyDefinition = $backupDependencyDefinition;
