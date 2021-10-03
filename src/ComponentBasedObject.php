@@ -126,6 +126,9 @@ class ComponentBasedObject
             // It is of the responsibility of the new instance to prepare its
             // dependencies from its perspective.
             $instance->referenceDependencies();
+
+            // Let the instance initialize itself.
+            $instance->onReady();
         }
         else {
             // Non-component based objects.
@@ -388,6 +391,28 @@ class ComponentBasedObject
     }
 
     /**
+     * Called after this instance has been added to its holder.
+     *
+     * Useful for initializations which runs every time this object is
+     * instantiated, like creating a default set of sub components.
+     */
+    protected function onReady(): void
+    {
+        // Implement if needed.
+    }
+
+    /**
+     * Called after removal from the component which held this instance.
+     *
+     * This gives the opportunity to clean up things like unsetting references,
+     * changing a value back to an ancient value and such.
+     */
+    protected function onRemoved(): void
+    {
+        // Implement if needed.
+    }
+
+    /**
      * Processes the dependency definition for this component.
      *
      * @param DependencyDefinition $dependencyDefinition
@@ -504,6 +529,10 @@ class ComponentBasedObject
     /**
      * Removes the specified component instance.
      *
+     * Note: this does not destroy the component! If any other object has a
+     * reference to it, it will still exist in memory. This may lead to memory
+     * leaks if not used properly.
+     *
      * @param object $component
      *   The component instance to remove.
      * @param string $componentBucketType
@@ -519,6 +548,11 @@ class ComponentBasedObject
             // This will compare by reference.
             if ($c === $component) {
                 unset($this->subComponents[$key]);
+
+                if ($c instanceof ComponentBasedObject) {
+                    $c->onRemoved();
+                }
+
                 return;
             }
         }
@@ -526,6 +560,10 @@ class ComponentBasedObject
 
     /**
      * Removes all components by class name.
+     *
+     * Note: this does not destroy the components! If any other object has a
+     * reference to them, they will still exist in memory. This may lead to
+     * memory leaks if not used properly.
      *
      * @param string $className
      *   Class name.
@@ -541,12 +579,20 @@ class ComponentBasedObject
         foreach ($componentBucket as $key => $c) {
             if ($c instanceof $className) {
                 unset($this->subComponents[$key]);
+
+                if ($c instanceof ComponentBasedObject) {
+                    $c->onRemoved();
+                }
             }
         }
     }
 
     /**
      * Removes the specified root component instance.
+     *
+     * Note: this does not destroy the component! If any other object has a
+     * reference to it, it will still exist in memory. This may lead to memory
+     * leaks if not used properly.
      *
      * @param object $component
      *   The component instance to remove.
@@ -558,6 +604,10 @@ class ComponentBasedObject
 
     /**
      * Removes all root components by class name.
+     *
+     * Note: this does not destroy the components! If any other object has a
+     * reference to them, they will still exist in memory. This may lead to
+     * memory leaks if not used properly.
      *
      * @param string $className
      *   Class name.
