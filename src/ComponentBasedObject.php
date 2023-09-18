@@ -12,7 +12,11 @@ class ComponentBasedObject
     /**
      * A reference to the fellow components container.
      *
-     * This is a very simple object which lists all fellow/sibling components.
+     * This is a very simple object which lists fellow/sibling components
+     * that this component needs to be aware of.
+     *
+     * Don't use this to return all the sub-components that the parent has,
+     * unless all the sub-components are fellow components.
      *
      * @var ComponentContainer
      */
@@ -82,13 +86,14 @@ class ComponentBasedObject
     /**
      * Creates a component instance by class name.
      *
-     * @param string $className
+     * @template T
+     * @param class-string<T> $className
      *   Fully-qualified class name.
      * @param string $componentBucketType
      *   The bucket where to put to component.
      *   One of ComponentBucketType::* consts.
      *
-     * @return object|null
+     * @return T|null
      *   The instantiated component. Null on soft failure: class does not exist,
      *   no bucket set.
      *
@@ -140,16 +145,18 @@ class ComponentBasedObject
             }
         }
 
+        /** @var T $instance */
         return $instance;
     }
 
     /**
      * Creates a root component instance by class name.
      *
-     * @param string $className
+     * @template T
+     * @param class-string<T> $className
      *   Fully-qualified class name.
      *
-     * @return object|null
+     * @return T|null
      *   The instantiated component.
      *
      * @throws UnmetDependencyException
@@ -163,7 +170,8 @@ class ComponentBasedObject
     /**
      * Gets a single component by class name.
      *
-     * @param string $className
+     * @template T
+     * @param class-string<T> $className
      *   Class name.
      * @param bool $addIfNotFound
      *   Set to true to attempt instantiation if not found.
@@ -171,7 +179,7 @@ class ComponentBasedObject
      *   The bucket where to get to component.
      *   One of ComponentBucketType::* consts.
      *
-     * @return object|null
+     * @return T|null
      *   The component if found.
      *
      * @throws UnmetDependencyException
@@ -230,20 +238,21 @@ class ComponentBasedObject
     /**
      * Gets components by class name.
      *
-     * @param string $className
+     * @template T
+     * @param class-string<T> $className
      *   Class name.
      * @param string $componentBucketType
      *   The bucket where to get to component.
      *   One of ComponentBucketType::* consts.
      *
-     * @return object[]
+     * @return T[]
      *   Array of components. May be empty.
      */
     public function getComponentsByClassName(string $className, string $componentBucketType = ComponentBucketType::SUB): array
     {
-        /** @var object[] $componentBucket */
         $componentBucket = $this->getComponents($componentBucketType);
 
+        /** @var T[] $components */
         $components = [];
 
         foreach ($componentBucket as $component) {
@@ -284,6 +293,7 @@ class ComponentBasedObject
     private function getFellowComponentsContainer() {
         if (empty($this->fellowComponentsContainer)) {
             $this->fellowComponentsContainer = new ComponentContainer();
+            $this->fellowComponentsContainer->components[] = $this;
         }
 
         return $this->fellowComponentsContainer;
@@ -307,12 +317,13 @@ class ComponentBasedObject
     /**
      * Gets a root component by class name.
      *
-     * @param string $className
+     * @template T
+     * @param class-string<T> $className
      *   Class name.
      * @param bool $addIfNotFound
      *   Set to true to attempt instantiation if not found.
      *
-     * @return object|null
+     * @return T|null
      *   The object. Null value if not found.
      *
      * @throws UnmetDependencyException
@@ -339,10 +350,11 @@ class ComponentBasedObject
     /**
      * Gets root components by class name.
      *
-     * @param string $className
+     * @template T
+     * @param class-string<T> $className
      *   Class name.
      *
-     * @return object[]
+     * @return T[]
      *   Array of components. May be empty.
      */
     public static function getRootComponentsByClassName(string $className): array
@@ -353,7 +365,7 @@ class ComponentBasedObject
     /**
      * Tells if there is a component by class name.
      *
-     * @param string $className
+     * @param class-string $className
      *   The class name.
      * @param string $componentBucketType
      *   The bucket where to check.
@@ -379,7 +391,7 @@ class ComponentBasedObject
     /**
      * Tells if there is a root component by class name.
      *
-     * @param string $className
+     * @param class-string $className
      *   The class name.
      *
      * @return bool
@@ -529,7 +541,7 @@ class ComponentBasedObject
     /**
      * Removes the specified component instance.
      *
-     * Note: this does not destroy the component! If any other object has a
+     * Note: this does not delete the component! If any other object has a
      * reference to it, it will still exist in memory. This may lead to memory
      * leaks if not used properly.
      *
@@ -561,11 +573,11 @@ class ComponentBasedObject
     /**
      * Removes all components by class name.
      *
-     * Note: this does not destroy the components! If any other object has a
-     * reference to them, they will still exist in memory. This may lead to
-     * memory leaks if not used properly.
+     * Note: this does not delete the component! If any other object has a
+     * reference to it, it will still exist in memory. This may lead to memory
+     * leaks if not used properly.
      *
-     * @param string $className
+     * @param class-string $className
      *   Class name.
      * @param string $componentBucketType
      *   The bucket where to check.
@@ -590,7 +602,7 @@ class ComponentBasedObject
     /**
      * Removes the specified root component instance.
      *
-     * Note: this does not destroy the component! If any other object has a
+     * Note: this does not delete the component! If any other object has a
      * reference to it, it will still exist in memory. This may lead to memory
      * leaks if not used properly.
      *
@@ -605,11 +617,11 @@ class ComponentBasedObject
     /**
      * Removes all root components by class name.
      *
-     * Note: this does not destroy the components! If any other object has a
-     * reference to them, they will still exist in memory. This may lead to
-     * memory leaks if not used properly.
+     * Note: this does not delete the component! If any other object has a
+     * reference to it, it will still exist in memory. This may lead to memory
+     * leaks if not used properly.
      *
-     * @param string $className
+     * @param class-string $className
      *   Class name.
      */
     public static function removeRootComponentsByClassName(string $className): void
